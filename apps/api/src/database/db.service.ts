@@ -18,10 +18,10 @@ export class DbService {
   async transaction<T>(
     fn: (tx: DatabaseTransactionConnection) => Promise<T>,
   ): Promise<T> {
-    try {
-      return await this.pool.transaction(fn);
-    } catch {
-      return null as unknown as T;
-    }
+    return this.pool.transaction(fn);
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.pool.end();
   }
 }

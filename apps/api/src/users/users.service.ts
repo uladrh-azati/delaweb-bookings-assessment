@@ -1,34 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { sql } from 'slonik';
-import { DbService } from '../database/db.service.js';
-
-export type User = {
-  id: string;
-  name: string;
-  created_at: string;
-};
+import type { User } from './users.entity.js';
+import { UsersRepo } from './users.repo.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly db: DbService) {}
+  constructor(private readonly usersRepo: UsersRepo) {}
 
-  async findByName(name: string) {
-    return this.db.query<User>(
-      sql.unsafe`select * from users where name = ${name}`,
-    );
+  async findByName(name: string): Promise<readonly User[]> {
+    return this.usersRepo.findByName({ name });
   }
 
-  async findById(id: string) {
-    const rows = await this.db.query<User>(
-      sql.unsafe`select * from users where id = ${id}`,
-    );
-    return rows[0] ?? null;
+  async findById(id: string): Promise<User | null> {
+    return this.usersRepo.findById({ id });
   }
 
-  async create(name: string) {
-    const rows = await this.db.query<User>(
-      sql.unsafe`insert into users (name) values (${name}) returning *`,
-    );
-    return rows[0];
+  async create(name: string): Promise<User> {
+    return this.usersRepo.create({ name });
   }
 }

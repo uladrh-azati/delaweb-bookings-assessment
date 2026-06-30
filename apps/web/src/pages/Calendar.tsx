@@ -1,60 +1,73 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { clearToken } from "../lib/auth";
-import { useMeQuery } from "../store/api";
+import {
+  CalendarGrid,
+  CalendarHeader,
+  ConfirmHoldDialog,
+  DurationSelector,
+  FeedbackMessage,
+  RoomSelector,
+  WeekControls,
+} from "../features/calendar/components";
+import { useCalendarPage } from "../features/calendar/useCalendarPage";
 
 export default function Calendar() {
-  const [events, setEvents] = useState<any[]>([]);
-  const { data: me } = useMeQuery();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:3000/ws`);
-    ws.onmessage = (e) => {
-      setEvents([...events, JSON.parse(e.data)]);
-    };
-    return () => ws.close();
-  }, []);
-
-  const onLogout = () => {
-    clearToken();
-    navigate("/login");
-  };
+  const calendar = useCalendarPage();
 
   return (
-    <div sx={{ p: 4, maxWidth: 960, mx: "auto" }}>
-      <header
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-        }}
-      >
-        <h1 sx={{ m: 0, fontSize: 4 }}>Calendar</h1>
-        <div sx={{ display: "flex", gap: 3, alignItems: "center" }}>
-          {me && (
-            <span sx={{ color: "secondary", fontSize: 1 }}>{me.name}</span>
-          )}
-          <button onClick={onLogout} sx={{ variant: "buttons.border" }}>
-            Sign out
-          </button>
-        </div>
-      </header>
+    <div sx={{ p: [3, 4], maxWidth: 1220, mx: "auto" }}>
+      <CalendarHeader
+        me={calendar.me}
+        weekStart={calendar.weekStart}
+        weekEnd={calendar.weekEnd}
+        onLogout={calendar.onLogout}
+      />
+
       <div
         sx={{
-          p: 4,
-          bg: "surface",
-          borderRadius: "lg",
-          boxShadow: "card",
-          minHeight: 400,
+          display: "flex",
+          alignItems: ["stretch", "center"],
+          justifyContent: "space-between",
+          gap: 3,
+          flexDirection: ["column", "row"],
+          mb: 3,
         }}
       >
-        <p sx={{ color: "secondary", mt: 0 }}>Calendar grid - to implement.</p>
-        <pre sx={{ fontSize: 1, color: "secondary" }}>
-          {JSON.stringify(events, null, 2)}
-        </pre>
+        <RoomSelector
+          rooms={calendar.rooms}
+          roomId={calendar.roomId}
+          onSelectRoom={calendar.onSelectRoom}
+        />
+        <WeekControls
+          onPreviousWeek={calendar.onPreviousWeek}
+          onCurrentWeek={calendar.onCurrentWeek}
+          onNextWeek={calendar.onNextWeek}
+        />
       </div>
+
+      <DurationSelector
+        durationMinutes={calendar.durationMinutes}
+        isUpdating={calendar.isUpdating}
+        onSelectDuration={calendar.onSelectDuration}
+      />
+
+      <FeedbackMessage message={calendar.message} />
+
+      <CalendarGrid
+        days={calendar.days}
+        slots={calendar.slots}
+        bookings={calendar.bookings}
+        me={calendar.me}
+        isCreatingHold={calendar.isCreatingHold}
+        isCancelingBooking={calendar.isCancelingBooking}
+        onSlotClick={calendar.onSlotClick}
+        onCancelBooking={calendar.onCancelBooking}
+      />
+
+      <ConfirmHoldDialog
+        activeHold={calendar.activeHold}
+        isConfirmingHold={calendar.isConfirmingHold}
+        onDismissHold={calendar.onDismissHold}
+        onConfirmHold={calendar.onConfirmHold}
+      />
     </div>
   );
 }

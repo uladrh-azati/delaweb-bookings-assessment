@@ -20,7 +20,7 @@ type Migration = {
   down?: (tx: DatabaseTransactionConnection) => Promise<void>;
 };
 
-async function ensureMigrationsTable(pool: DatabasePool) {
+async function ensureMigrationsTable(pool: DatabasePool): Promise<void> {
   await pool.query(sql.unsafe`
     create table if not exists _migrations (
       name text primary key,
@@ -33,12 +33,12 @@ async function loadAppliedNames(pool: DatabasePool): Promise<Set<string>> {
   const rows = await pool.any(
     sql.unsafe`select name from _migrations order by name`,
   );
-  return new Set(rows.map((r) => (r as { name: string }).name));
+  return new Set(rows.map((r): string => (r as { name: string }).name));
 }
 
 async function discoverFiles(): Promise<string[]> {
   const all = await readdir(MIGRATIONS_DIR);
-  return all.filter((f) => /^\d+_.+\.ts$/.test(f)).sort();
+  return all.filter((f): boolean => /^\d+_.+\.ts$/.test(f)).sort();
 }
 
 async function loadMigration(file: string): Promise<Migration> {
@@ -46,7 +46,7 @@ async function loadMigration(file: string): Promise<Migration> {
   return (await import(url)) as Migration;
 }
 
-async function migrateUp(pool: DatabasePool) {
+async function migrateUp(pool: DatabasePool): Promise<void> {
   const applied = await loadAppliedNames(pool);
   const files = await discoverFiles();
   let count = 0;
@@ -58,7 +58,7 @@ async function migrateUp(pool: DatabasePool) {
     }
     const mod = await loadMigration(file);
     console.log(`  apply  ${name}`);
-    await pool.transaction(async (tx) => {
+    await pool.transaction(async (tx): Promise<void> => {
       await mod.up(tx);
       await tx.query(
         sql.unsafe`insert into _migrations (name) values (${name})`,
@@ -69,7 +69,7 @@ async function migrateUp(pool: DatabasePool) {
   console.log(`done. ${count} migration(s) applied.`);
 }
 
-async function migrateDown(pool: DatabasePool) {
+async function migrateDown(pool: DatabasePool): Promise<void> {
   const applied = await loadAppliedNames(pool);
   const files = await discoverFiles();
   const lastName = [...applied].sort().pop();
@@ -77,7 +77,7 @@ async function migrateDown(pool: DatabasePool) {
     console.log('nothing to revert.');
     return;
   }
-  const file = files.find((f) => f.replace(/\.ts$/, '') === lastName);
+  const file = files.find((f): boolean => f.replace(/\.ts$/, '') === lastName);
   if (!file) {
     throw new Error(`migration file for ${lastName} not found`);
   }
@@ -88,7 +88,7 @@ async function migrateDown(pool: DatabasePool) {
     );
   }
   console.log(`  revert ${lastName}`);
-  await pool.transaction(async (tx) => {
+  await pool.transaction(async (tx): Promise<void> => {
     await tx.query(
       sql.unsafe`delete from _migrations where name = ${lastName}`,
     );
@@ -97,7 +97,7 @@ async function migrateDown(pool: DatabasePool) {
   console.log('done.');
 }
 
-async function main() {
+async function main(): Promise<void> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     console.error(
@@ -126,7 +126,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch((err: unknown): never => {
   console.error(err);
   process.exit(1);
 });
