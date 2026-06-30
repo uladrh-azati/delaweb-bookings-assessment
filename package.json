@@ -1,0 +1,17 @@
+{
+  "name": "booking-app",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "migrate": "pnpm --filter api run migrate",
+    "migrate:down": "pnpm --filter api run migrate:down",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d --wait && pnpm migrate",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test"
+  },
+  "packageManager": "pnpm@9.12.0"
+}
