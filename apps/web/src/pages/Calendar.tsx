@@ -59,6 +59,7 @@ export default function Calendar() {
         isCreatingHold={calendar.isCreatingHold}
         isCancelingBooking={calendar.isCancelingBooking}
         onSlotClick={calendar.onSlotClick}
+        onOpenHold={calendar.onOpenHold}
         onCancelBooking={calendar.onCancelBooking}
       />
 

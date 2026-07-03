@@ -37,6 +37,7 @@ type UseCalendarPageResult = {
   onNextWeek: () => void;
   onSelectDuration: (durationMinutes: number) => void;
   onSlotClick: (slotStart: Date) => Promise<void>;
+  onOpenHold: (booking: Booking) => void;
   onConfirmHold: () => Promise<void>;
   onDismissHold: () => void;
   onCancelBooking: (booking: Booking) => Promise<void>;
@@ -150,6 +151,12 @@ export function useCalendarPage(): UseCalendarPageResult {
     }
   };
 
+  const onOpenHold = (booking: Booking): void => {
+    if (booking.status !== "held" || booking.userId !== me?.userId) return;
+    setMessage("");
+    setActiveHold(booking);
+  };
+
   const onConfirmHold = async (): Promise<void> => {
     if (!activeHold) return;
     setMessage("");
@@ -192,6 +199,7 @@ export function useCalendarPage(): UseCalendarPageResult {
     onNextWeek: (): void => setWeekStart(addDays(weekStart, 7)),
     onSelectDuration: setDurationMinutes,
     onSlotClick,
+    onOpenHold,
     onConfirmHold,
     onDismissHold: (): void => setActiveHold(null),
     onCancelBooking,

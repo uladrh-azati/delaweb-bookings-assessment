@@ -11,6 +11,7 @@ type BookingCellProps = {
   slotLabel: string;
   slotStart: Date;
   onSlotClick: (slotStart: Date) => void;
+  onOpenHold: (booking: Booking) => void;
   onCancelBooking: (booking: Booking) => void;
   isCancelingBooking: boolean;
 };
@@ -25,9 +26,12 @@ export function BookingCell({
   slotLabel,
   slotStart,
   onSlotClick,
+  onOpenHold,
   onCancelBooking,
   isCancelingBooking,
 }: BookingCellProps) {
+  const canOpenHold = booking?.status === "held" && isMine;
+
   if (booking) {
     return (
       <div
@@ -66,6 +70,21 @@ export function BookingCell({
             <span sx={{ color: "secondary" }}>
               {timeRange(booking.startTime, booking.endTime)}
             </span>
+            {canOpenHold && (
+              <button
+                onClick={() => onOpenHold(booking)}
+                sx={{
+                  variant: "buttons.invisible",
+                  p: 0,
+                  justifyContent: "flex-start",
+                  fontSize: 0,
+                  color: "primary",
+                  minHeight: 22,
+                }}
+              >
+                Confirm
+              </button>
+            )}
             {booking.status === "confirmed" && isMine && (
               <button
                 onClick={() => onCancelBooking(booking)}

@@ -17,6 +17,7 @@ type CalendarGridProps = {
   isCreatingHold: boolean;
   isCancelingBooking: boolean;
   onSlotClick: (slotStart: Date) => void;
+  onOpenHold: (booking: Booking) => void;
   onCancelBooking: (booking: Booking) => void;
 };
 
@@ -28,6 +29,7 @@ export function CalendarGrid({
   isCreatingHold,
   isCancelingBooking,
   onSlotClick,
+  onOpenHold,
   onCancelBooking,
 }: CalendarGridProps) {
   return (
@@ -110,6 +112,7 @@ export function CalendarGrid({
                   slotLabel={slot.label}
                   slotStart={slotStart}
                   onSlotClick={onSlotClick}
+                  onOpenHold={onOpenHold}
                   onCancelBooking={onCancelBooking}
                   isCancelingBooking={isCancelingBooking}
                 />
