@@ -1,6 +1,6 @@
 import { sql, type DatabaseTransactionConnection } from 'slonik';
 
-export async function up(tx: DatabaseTransactionConnection) {
+export async function up(tx: DatabaseTransactionConnection): Promise<void> {
   await tx.query(sql.unsafe`
     create table users (
       id uuid primary key default gen_random_uuid(),
@@ -21,7 +21,7 @@ export async function up(tx: DatabaseTransactionConnection) {
   `);
 }
 
-export async function down(tx: DatabaseTransactionConnection) {
+export async function down(tx: DatabaseTransactionConnection): Promise<void> {
   await tx.query(sql.unsafe`drop table rooms`);
   await tx.query(sql.unsafe`drop table users`);
 }
